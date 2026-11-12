@@ -147,6 +147,16 @@ export class ApiError extends Error {
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
 
+// Sin VITE_API_URL el frontend llama a su propio dominio y todo responde 405.
+// Es un fallo fácil de no ver, así que al menos queda un aviso explícito.
+if (import.meta.env.PROD && !API_BASE) {
+  console.error(
+    '[ONDA] Falta VITE_API_URL en el build. El frontend está apuntando a su propio ' +
+      'dominio (/api/v1/...) y las peticiones devolverán 405. Configúrala en Vercel ' +
+      'y vuelve a desplegar.',
+  )
+}
+
 async function request<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const headers = new Headers(options.headers)
   if (options.body) headers.set('Content-Type', 'application/json')
